@@ -114,7 +114,6 @@ def edit(id):
     post = get_post(id)
 
     if request.method == 'POST':
-        pass
         # get form data
         title = request.form['title']
         content = request.form['content']
@@ -129,16 +128,26 @@ def edit(id):
         elif not title:
             flash('Title is required!')
             return redirect(url_for('edit', id=id))
+        else:
+            # get connection to database
+            conn = get_db_connection()
 
-        # get connection to database
-        conn = get_db_connection()
+            # create a cursor object
+            cur = conn.cursor()
 
-        # create a cursor object
-        cur = conn.cursor()
+            # execute SQL query to update the post with the given id in the posts table
+            cur.execute("UPDATE posts SET title=?, content=? WHERE id=?", (title, content, id))
 
-        # execute SQL query to update the post with the given id in the posts table
-        cur.execute("UPDATE posts SET title=?, content=? WHERE id=?", (title, content, id))
-        
+            # commit the changes to the database
+            conn.commit()
+
+            # close the cursor and connection
+            cur.close()
+            conn.close()
+
+            # redirect to the index page
+            return redirect(url_for('index'))
+            
     # render the create.html template
     return render_template('edit.html', post=post)
 app.run()
