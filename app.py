@@ -19,6 +19,27 @@ def get_db_connection():
     #return the connection object
     return conn
 
+# Function to retrieve a post from the database
+def get_post(post_id):
+    # get connection to database
+    conn = get_db_connection()
+
+    # create a cursor object
+    cur = conn.cursor()
+
+    # execute SQL query to select the post with the given id from the posts table and fetch the post from the cursor
+    post = cur.execute("SELECT * FROM posts WHERE id=?", (post_id,)).fetchone()
+
+    # close the cursor and connection
+    cur.close()
+    conn.close()
+
+    # if no post was found, return None
+    if post is None:
+        abort(404)
+
+    # return the post
+    return post
 
 # use the app.route() decorator to create a Flask view function called index()
 @app.route('/')
@@ -83,5 +104,40 @@ def create():
     else:
         # render the create.html template
         return render_template('create.html')
+    
 
+# route to delete a post
+
+# route to update a post
+@app.route('/<int:id>/edit/', methods=['GET', 'POST'])
+def edit(id):
+    post = get_post(id)
+
+    if request.method == 'POST':
+        # get form data
+        title = request.form['title']
+        content = request.form['content']
+
+        # validate form data
+        if not title and not content:
+            flash('Title and Content are required!')
+            return redirect(url_for('edit', id=id))
+        elif not content:
+            flash('Content is required!')
+            return redirect(url_for('edit', id=id))
+        elif not title:
+            flash('Title is required!')
+            return redirect(url_for('edit', id=id))
+
+        # get connection to database
+        conn = get_db_connection()
+
+        # create a cursor object
+        cur = conn.cursor()
+
+        # execute SQL query to update the post with the given id in the posts table
+        cur.execute("UPDATE posts SET title=?, content=? WHERE id=?", (title, content, id))
+        
+        # render the create.html template
+        return render_template('edit.html', post=post)
 app.run()
