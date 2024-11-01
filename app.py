@@ -54,14 +54,14 @@ def index():
     cur.execute("SELECT * FROM posts")
 
     # fetch all rows from the cursor
-    rows = cur.fetchall()
+    post = cur.fetchall()
 
     # close the cursor and connection
     cur.close()
     conn.close()
 
     # render the index.html template with the fetched rows
-    return render_template('index.html', posts=rows)
+    return render_template('index.html', posts=post)
 
 # route to create a post
 @app.route('/create/', methods=['GET', 'POST'])
@@ -114,6 +114,7 @@ def edit(id):
     post = get_post(id)
 
     if request.method == 'POST':
+        pass
         # get form data
         title = request.form['title']
         content = request.form['content']
@@ -138,6 +139,6 @@ def edit(id):
         # execute SQL query to update the post with the given id in the posts table
         cur.execute("UPDATE posts SET title=?, content=? WHERE id=?", (title, content, id))
         
-        # render the create.html template
-        return render_template('edit.html', post=post)
+    # render the create.html template
+    return render_template('edit.html', post=post)
 app.run()
