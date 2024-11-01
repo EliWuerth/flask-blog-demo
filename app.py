@@ -104,9 +104,6 @@ def create():
     else:
         # render the create.html template
         return render_template('create.html')
-    
-
-# route to delete a post
 
 # route to update a post
 @app.route('/<int:id>/edit/', methods=['GET', 'POST'])
@@ -150,4 +147,34 @@ def edit(id):
             
     # render the create.html template
     return render_template('edit.html', post=post)
+
+# route to delete a post
+@app.route('/<int:id>/delete/', methods=['POST'])
+def delete(id):
+    # get the post with the given id from the database
+    post = get_post(id)
+
+    # get connection to database
+    conn = get_db_connection()
+
+    # create a cursor object
+    cur = conn.cursor()
+
+    # execute SQL query to delete the post with the given id from the posts table
+    cur.execute("DELETE FROM posts WHERE id=?", (id,))
+
+    # commit the changes to the database
+    conn.commit()
+
+    # close the cursor and connection
+    cur.close()
+    conn.close()
+
+    # flash a message indicating that the post was deleted
+    flash('"{}" was successfully deleted!'. format(post['title']))
+
+    # redirect to the index page
+    return redirect(url_for('index'))
+
+
 app.run()
